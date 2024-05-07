@@ -73,7 +73,9 @@ app.get('/weather', async (req, res) => {
 
         // Получаем прогноз погоды по координатам
         const weatherResponse = await axios.get(`${YR_API_URL}?lat=${lat}&lon=${lon}`, { headers });
-        const forecast = weatherResponse.data.properties.timeseries.map(entry => ({
+        const forecast = weatherResponse.data.properties.timeseries.filter(entry => {
+            return entry.time.includes('T14:00');
+        }).map(entry => ({
             time: entry.time,
             temperature: entry.data.instant.details.air_temperature
         }));
@@ -84,31 +86,6 @@ app.get('/weather', async (req, res) => {
     }
 });
 
-app.post('/weather', async (req, res) => {
-    try {
-        const cityName = req.body.city;
-        // Получение координат города по его названию
-        const locationResponse = await axios.get(NOMINATIM_URL, {
-            params: {
-                q: cityName,
-                format: 'json',
-                limit: 1
-            }
-        });
-        const { lat, lon } = locationResponse.data[0];
-
-        // Получение погоды по координатам города
-        const weatherResponse = await axios.get(`${YR_API_URL}?lat=${lat}&lon=${lon}`, { headers } );
-        const forecast = weatherResponse.data.properties.timeseries.map(entry => ({
-            time: entry.time,
-            temperature: entry.data.instant.details.air_temperature
-        }));
-        res.json(forecast);
-    } catch (error) {
-        console.error('Error fetching weather data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch weather data' });
-    }
-});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
