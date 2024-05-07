@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>WEATHER API</h1>
-    <form id="weatherForm">
+    <form id="weatherForm", method="get">
         <label for="cityInput">Название города:</label>
         <input type="text" id="cityInput" name="city">
         <button type="submit">Отправить</button>
@@ -22,13 +22,12 @@
             const city = document.getElementById('cityInput').value;
 
             try {
-                const response = await fetch('/weather', {
-                    method: 'POST',
+                const response = await fetch(`/weather?city=${encodeURIComponent(city)}`, {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 YaBrowser/24.4.0.0 Safari/537.36"
                     },
-                    body: new URLSearchParams({ city })
                 });
                 const data = await response.json();
 
@@ -38,9 +37,7 @@
 
                 data.forEach(entry => {
                     const forecastItem = document.createElement('div');
-                    const date = new Date(entry.time);
-                    const formattedDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-                    forecastItem.textContent = `Дата: ${formattedDate} Температура: ${entry.temperature}°C`;
+                    forecastItem.textContent = `Дата: ${entry.time} Температура: ${entry.temperature}°C`;
                     weatherResult.appendChild(forecastItem);
                 });
             } catch (error) {
